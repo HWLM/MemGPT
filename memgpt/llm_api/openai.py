@@ -383,7 +383,22 @@ def openai_chat_completions_request(
         data.pop("tools")
         data.pop("tool_choice", None)  # extra safe,  should exist always (default="auto")
 
+    print("postgpt~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    # data["tool_choice"] = "none"
+    data["tool_choice"] = {"type": "function", "function": {"name": "send_message"}}
+    for m in data["messages"]:
+        if isinstance(m.get("content"), str) and (m.get("content").startswith("{")):
+            if json.loads(m.get("content")).get("message") is None:
+                data2 = json.loads(m.get("content"))
+                data2["message"] = "None"
+    # data["messages"] = [m for m in data["messages"] if (m.get("content") is not None and m.get("role") != 'tool') or (m.get("role") == 'tool'
+    #         and json.loads(m.get("content")).get("message") is not None
+    #         and json.loads(m.get("content")).get("message") != "None")]
     printd(f"Sending request to {url}")
+    print("postgpt.111=========")
+    print(data)
+    print("postgpt.222=========")
+
     try:
         response = requests.post(url, headers=headers, json=data)
         # printd(f"response = {response}, response.text = {response.text}")
